@@ -1,0 +1,8 @@
+description: Resource conflict
+headers:
+  X-Correlation-Id:
+    $ref: '../headers.yaml#/CorrelationId'
+content:
+  application/problem+json:
+    schema:
+      $ref: '../schemas/ErrorResponse.yaml#/ErrorResponse'

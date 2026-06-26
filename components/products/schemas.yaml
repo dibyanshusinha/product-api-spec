@@ -1,0 +1,159 @@
+ProductCreateRequest:
+  type: object
+  additionalProperties: false
+  required:
+    - name
+    - sku
+    - price
+  properties:
+    name:
+      type: string
+      minLength: 1
+      maxLength: 120
+      example: Mechanical Keyboard
+    sku:
+      type: string
+      minLength: 1
+      maxLength: 64
+      example: KEY-001
+    description:
+      type: string
+      maxLength: 500
+      example: Compact keyboard with tactile switches
+      nullable: true
+    price:
+      type: number
+      minimum: 0
+      exclusiveMinimum: true
+      multipleOf: 0.01
+      example: 129.99
+    active:
+      type: boolean
+      default: true
+
+
+ProductUpdateRequest:
+  type: object
+  additionalProperties: false
+  required:
+    - name
+    - sku
+    - price
+    - active
+  properties:
+    name:
+      type: string
+      minLength: 1
+      maxLength: 120
+      example: Mechanical Keyboard
+    sku:
+      type: string
+      minLength: 1
+      maxLength: 64
+      example: KEY-001
+    description:
+      type: string
+      maxLength: 500
+      example: Compact keyboard with tactile switches
+      nullable: true
+    price:
+      type: number
+      minimum: 0
+      exclusiveMinimum: true
+      multipleOf: 0.01
+      example: 129.99
+    active:
+      type: boolean
+      example: true
+
+
+ProductResponse:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - name
+    - sku
+    - price
+    - active
+    - createdAt
+    - updatedAt
+  properties:
+    id:
+      type: integer
+      format: int64
+      minimum: 1
+      readOnly: true
+      example: 42
+    name:
+      type: string
+      minLength: 1
+      maxLength: 120
+      example: Mechanical Keyboard
+    sku:
+      type: string
+      minLength: 1
+      maxLength: 64
+      example: KEY-001
+    description:
+      type: string
+      maxLength: 500
+      nullable: true
+      example: Compact keyboard with tactile switches
+    price:
+      type: number
+      minimum: 0
+      exclusiveMinimum: true
+      multipleOf: 0.01
+      example: 129.99
+    active:
+      type: boolean
+      example: true
+    createdAt:
+      type: string
+      format: date-time
+      readOnly: true
+      example: 2026-06-26T08:30:00Z
+    updatedAt:
+      type: string
+      format: date-time
+      readOnly: true
+      example: 2026-06-26T08:30:00Z
+
+
+ProductPage:
+  type: object
+  additionalProperties: false
+  required:
+    - content
+    - page
+    - size
+    - totalElements
+    - totalPages
+    - last
+  properties:
+    content:
+      type: array
+      items:
+        $ref: '#/ProductResponse'
+    page:
+      type: integer
+      minimum: 0
+      example: 0
+    size:
+      type: integer
+      minimum: 1
+      maximum: 100
+      example: 20
+    totalElements:
+      type: integer
+      format: int64
+      minimum: 0
+      example: 1
+    totalPages:
+      type: integer
+      minimum: 0
+      example: 1
+    last:
+      type: boolean
+      example: true

@@ -1,0 +1,100 @@
+openapi: 3.0.3
+info:
+  title: Spring Boot REST API
+  description: Production-minded REST API with products, validation, persistence, OpenAPI, and Actuator.
+  version: 1.0.0
+servers:
+  - url: /
+tags:
+  - name: APIs
+    description: API Specifications
+paths:
+  /v1/products:
+    get:
+      tags:
+        - Products
+      operationId: listProducts
+      summary: List products
+      parameters:
+        - $ref: './components/common/parameters.yaml#/CorrelationId'
+        - $ref: './components/common/parameters.yaml#/Page'
+        - $ref: './components/common/parameters.yaml#/Size'
+        - $ref: './paths/products/parameters.yaml#/SortBy'
+        - $ref: './components/common/parameters.yaml#/Direction'
+      responses:
+        '200':
+          $ref: './paths/products/responses.yaml#/ProductList'
+        '400':
+          $ref: './components/common/responses/BadRequest.yaml'
+    post:
+      tags:
+        - Products
+      operationId: createProduct
+      summary: Create product
+      parameters:
+        - $ref: './components/common/parameters.yaml#/CorrelationId'
+      requestBody:
+        description: Product payload for creation.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './components/products/schemas.yaml#/ProductCreateRequest'
+      responses:
+        '201':
+          $ref: './paths/products/responses.yaml#/ProductCreated'
+        '400':
+          $ref: './components/common/responses/BadRequest.yaml'
+        '409':
+          $ref: './components/common/responses/Conflict.yaml'
+  /v1/products/{id}:
+    get:
+      tags:
+        - Products
+      operationId: getProduct
+      summary: Get product
+      parameters:
+        - $ref: './components/common/parameters.yaml#/CorrelationId'
+        - $ref: './components/common/parameters.yaml#/Id'
+      responses:
+        '200':
+          $ref: './paths/products/responses.yaml#/ProductReturned'
+        '404':
+          $ref: './components/common/responses/NotFound.yaml'
+    put:
+      tags:
+        - Products
+      operationId: updateProduct
+      summary: Update product
+      parameters:
+        - $ref: './components/common/parameters.yaml#/CorrelationId'
+        - $ref: './components/common/parameters.yaml#/Id'
+      requestBody:
+        description: Product payload for update.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './components/products/schemas.yaml#/ProductUpdateRequest'
+      responses:
+        '200':
+          $ref: './paths/products/responses.yaml#/ProductReturned'
+        '400':
+          $ref: './components/common/responses/BadRequest.yaml'
+        '404':
+          $ref: './components/common/responses/NotFound.yaml'
+        '409':
+          $ref: './components/common/responses/Conflict.yaml'
+    delete:
+      tags:
+        - Products
+      operationId: deleteProduct
+      summary: Delete product
+      parameters:
+        - $ref: './components/common/parameters.yaml#/CorrelationId'
+        - $ref: './components/common/parameters.yaml#/Id'
+      responses:
+        '204':
+          $ref: './paths/products/responses.yaml#/ProductDeleted'
+        '404':
+          $ref: './components/common/responses/NotFound.yaml'

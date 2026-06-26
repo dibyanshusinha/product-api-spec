@@ -1,0 +1,4 @@
+CorrelationId:
+  description: Request correlation identifier.
+  schema:
+    $ref: 'schemas/CorrelationId.yaml#/CorrelationId'

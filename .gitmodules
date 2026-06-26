@@ -1,0 +1,3 @@
+[submodule "standards/api-design-standard"]
+	path = standards/api-design-standard
+	url = https://github.com/dibyanshusinha/api-design-standard.git

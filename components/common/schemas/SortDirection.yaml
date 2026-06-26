@@ -1,0 +1,6 @@
+SortDirection:
+  type: string
+  default: DESC
+  enum:
+    - ASC
+    - DESC

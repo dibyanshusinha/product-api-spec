@@ -1,0 +1,42 @@
+CorrelationId:
+  name: X-Correlation-Id
+  in: header
+  description: Optional request correlation identifier.
+  required: false
+  schema:
+    $ref: 'schemas/CorrelationId.yaml#/CorrelationId'
+Id:
+  name: id
+  in: path
+  description: Resource identifier.
+  required: true
+  schema:
+    type: integer
+    format: int64
+    minimum: 1
+Page:
+  name: page
+  in: query
+  description: Zero-based page number.
+  required: false
+  schema:
+    type: integer
+    minimum: 0
+    default: 0
+Size:
+  name: size
+  in: query
+  description: Page size for results.
+  required: false
+  schema:
+    type: integer
+    minimum: 1
+    maximum: 100
+    default: 20
+Direction:
+  name: direction
+  in: query
+  description: Sort direction.
+  required: false
+  schema:
+    $ref: 'schemas/SortDirection.yaml#/SortDirection'
