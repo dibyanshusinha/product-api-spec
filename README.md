@@ -2,7 +2,7 @@
 
 Independent OpenAPI contract project for the Product API.
 
-This project owns the API shape. Spring Boot services consume this repository as a git submodule and generate server interfaces/models from `openapi.yaml`.
+This project owns the API shape. Backend services consume this repository as a git submodule and generate server interfaces/models from `openapi.yaml`.
 
 ## Layout
 

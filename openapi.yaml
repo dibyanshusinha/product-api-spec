@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
-  title: Spring Boot REST API
-  description: Production-minded REST API with products, validation, persistence, OpenAPI, and Actuator.
+  title: Product Service API
+  description: Production-minded REST API contract for managing products, including validation, schema definitions, and token-based pagination.
   version: 1.0.0
   contact:
     name: Product API Team
