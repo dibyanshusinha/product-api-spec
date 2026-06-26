@@ -35,11 +35,6 @@ ProductCreateRequest:
 ProductUpdateRequest:
   type: object
   additionalProperties: false
-  required:
-    - name
-    - sku
-    - price
-    - active
   properties:
     name:
       type: string
@@ -119,6 +114,11 @@ ProductResponse:
       format: date-time
       readOnly: true
       example: 2026-06-26T08:30:00Z
+    version:
+      type: integer
+      format: int64
+      readOnly: true
+      example: 0
 
 
 ProductPage:

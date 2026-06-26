@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Product Service API
+  title: API Service
   description: Production-minded REST API contract for managing products, including validation, schema definitions, and token-based pagination.
   version: 1.0.0
   contact:
@@ -13,8 +13,6 @@ security:
 tags:
   - name: Products
     description: Operations related to products management
-  - name: APIs
-    description: API Specifications
 paths:
   /v1/products:
     get:
