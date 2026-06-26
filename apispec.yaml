@@ -3,9 +3,16 @@ info:
   title: Spring Boot REST API
   description: Production-minded REST API with products, validation, persistence, OpenAPI, and Actuator.
   version: 1.0.0
+  contact:
+    name: Product API Team
+    email: api-support@example.com
 servers:
   - url: /
+security:
+  - bearerAuth: []
 tags:
+  - name: Products
+    description: Operations related to products management
   - name: APIs
     description: API Specifications
 paths:
@@ -15,10 +22,11 @@ paths:
         - Products
       operationId: listProducts
       summary: List products
+      description: Retrieve a paginated list of products, optionally sorted by specified fields.
       parameters:
         - $ref: './components/common/parameters.yaml#/CorrelationId'
-        - $ref: './components/common/parameters.yaml#/Page'
-        - $ref: './components/common/parameters.yaml#/Size'
+        - $ref: './components/common/parameters.yaml#/PageSize'
+        - $ref: './components/common/parameters.yaml#/PageToken'
         - $ref: './paths/products/parameters.yaml#/SortBy'
         - $ref: './components/common/parameters.yaml#/Direction'
       responses:
@@ -31,8 +39,10 @@ paths:
         - Products
       operationId: createProduct
       summary: Create product
+      description: Create a new product with the provided details.
       parameters:
         - $ref: './components/common/parameters.yaml#/CorrelationId'
+        - $ref: './components/common/parameters.yaml#/IdempotencyKey'
       requestBody:
         description: Product payload for creation.
         required: true
@@ -47,28 +57,32 @@ paths:
           $ref: './components/common/responses/BadRequest.yaml'
         '409':
           $ref: './components/common/responses/Conflict.yaml'
-  /v1/products/{id}:
+  /v1/products/{productId}:
     get:
       tags:
         - Products
       operationId: getProduct
       summary: Get product
+      description: Retrieve a specific product by its unique identifier.
       parameters:
         - $ref: './components/common/parameters.yaml#/CorrelationId'
-        - $ref: './components/common/parameters.yaml#/Id'
+        - $ref: './components/common/parameters.yaml#/ProductId'
       responses:
         '200':
           $ref: './paths/products/responses.yaml#/ProductReturned'
         '404':
           $ref: './components/common/responses/NotFound.yaml'
-    put:
+    patch:
       tags:
         - Products
       operationId: updateProduct
       summary: Update product
+      description: Perform a partial or full update of an existing product.
       parameters:
         - $ref: './components/common/parameters.yaml#/CorrelationId'
-        - $ref: './components/common/parameters.yaml#/Id'
+        - $ref: './components/common/parameters.yaml#/ProductId'
+        - $ref: './components/common/parameters.yaml#/UpdateMask'
+        - $ref: './components/common/parameters.yaml#/IfMatch'
       requestBody:
         description: Product payload for update.
         required: true
@@ -90,11 +104,20 @@ paths:
         - Products
       operationId: deleteProduct
       summary: Delete product
+      description: Delete a product by its unique identifier.
       parameters:
         - $ref: './components/common/parameters.yaml#/CorrelationId'
-        - $ref: './components/common/parameters.yaml#/Id'
+        - $ref: './components/common/parameters.yaml#/ProductId'
+        - $ref: './components/common/parameters.yaml#/IfMatch'
       responses:
         '204':
           $ref: './paths/products/responses.yaml#/ProductDeleted'
         '404':
           $ref: './components/common/responses/NotFound.yaml'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Use Bearer JWT token to access endpoints.

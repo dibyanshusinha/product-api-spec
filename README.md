@@ -16,16 +16,16 @@ standards/
 
 ## Validate The API Design
 
-Install dependencies:
+Install dependencies in the standards submodule:
 
 ```bash
-npm install
+npm install --prefix standards/api-design-standard
 ```
 
 Run the design standard:
 
 ```bash
-npm run lint
+node standards/api-design-standard/tools/run-api-design-standard.mjs apispec.yaml
 ```
 
 The lint command uses:

@@ -145,6 +145,11 @@ ProductPage:
       minimum: 1
       maximum: 100
       example: 20
+    nextPageToken:
+      type: string
+      nullable: true
+      description: Token to retrieve the next page of results, or null if there are no more results.
+      example: "eyJvZmZzZXQiOjIwLCJsaW1pdCI6MjB9"
     totalElements:
       type: integer
       format: int64

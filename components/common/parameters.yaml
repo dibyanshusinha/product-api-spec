@@ -5,34 +5,54 @@ CorrelationId:
   required: false
   schema:
     $ref: 'schemas/CorrelationId.yaml#/CorrelationId'
-Id:
-  name: id
+ProductId:
+  name: productId
   in: path
-  description: Resource identifier.
+  description: Unique identifier of the product.
   required: true
   schema:
     type: integer
     format: int64
     minimum: 1
-Page:
-  name: page
+PageSize:
+  name: pageSize
   in: query
-  description: Zero-based page number.
-  required: false
-  schema:
-    type: integer
-    minimum: 0
-    default: 0
-Size:
-  name: size
-  in: query
-  description: Page size for results.
+  description: The maximum number of products to return.
   required: false
   schema:
     type: integer
     minimum: 1
     maximum: 100
     default: 20
+PageToken:
+  name: pageToken
+  in: query
+  description: The token to retrieve the next page of results.
+  required: false
+  schema:
+    type: string
+UpdateMask:
+  name: updateMask
+  in: query
+  description: Field mask listing the paths to be updated.
+  required: false
+  schema:
+    type: string
+IfMatch:
+  name: If-Match
+  in: header
+  description: Entity tag to check for optimistic concurrency control.
+  required: false
+  schema:
+    type: string
+IdempotencyKey:
+  name: Idempotency-Key
+  in: header
+  description: Unique key to identify request idempotency.
+  required: false
+  schema:
+    type: string
+    format: uuid
 Direction:
   name: direction
   in: query

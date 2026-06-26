@@ -27,7 +27,7 @@ jobs:
           node-version: "22"
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --prefix standards/api-design-standard
 
       - name: Lint OpenAPI spec
-        run: npm run lint
+        run: node standards/api-design-standard/tools/run-api-design-standard.mjs apispec.yaml
