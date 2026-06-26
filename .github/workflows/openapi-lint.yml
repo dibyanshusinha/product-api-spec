@@ -15,6 +15,9 @@ on:
 jobs:
   lint-openapi:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,4 +33,142 @@ jobs:
         run: npm install --prefix standards/api-design-standard
 
       - name: Lint OpenAPI spec
-        run: node standards/api-design-standard/tools/run-api-design-standard.mjs openapi.yaml
+        run: node standards/api-design-standard/tools/run-api-design-standard.mjs openapi.yaml --format json --output report.json
+        continue-on-error: true
+
+      - name: Post Lint Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const workspace = process.env.GITHUB_WORKSPACE;
+
+            // Load yaml parser from submodule node_modules
+            const YAML = require(path.join(workspace, 'standards/api-design-standard/node_modules/yaml'));
+
+            // Load ruleset to get all rules and their descriptions
+            const rulesetPath = path.join(workspace, 'standards/api-design-standard/spectral.yaml');
+            const ruleset = YAML.parse(fs.readFileSync(rulesetPath, 'utf8'));
+            const rules = ruleset.rules || {};
+
+            // Load report
+            const reportPath = path.join(workspace, 'report.json');
+            let report = [];
+            if (fs.existsSync(reportPath)) {
+              report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+            }
+
+            // Map of severity levels
+            const severityMap = {
+              0: { label: 'Error', emoji: '❌' },
+              1: { label: 'Warning', emoji: '⚠️' },
+              2: { label: 'Info', emoji: 'ℹ️' },
+              3: { label: 'Hint', emoji: '💡' }
+            };
+
+            // Group diagnostics by rule name
+            const findingsMap = {};
+            let errorCount = 0;
+            let warningCount = 0;
+            let infoCount = 0;
+            let hintCount = 0;
+
+            for (const finding of report) {
+              const ruleName = finding.code;
+              if (!findingsMap[ruleName]) {
+                findingsMap[ruleName] = [];
+              }
+              findingsMap[ruleName].push(finding);
+              
+              const severity = finding.severity;
+              if (severity === 0) errorCount++;
+              else if (severity === 1) warningCount++;
+              else if (severity === 2) infoCount++;
+              else if (severity === 3) hintCount++;
+            }
+
+            // Group rules into passed/failed
+            const passedRules = [];
+            const failedRules = [];
+
+            for (const [ruleName, ruleDef] of Object.entries(rules)) {
+              const description = ruleDef.description || 'No description provided';
+              const findings = findingsMap[ruleName];
+              if (findings && findings.length > 0) {
+                failedRules.push({ name: ruleName, description, findings });
+              } else {
+                passedRules.push({ name: ruleName, description });
+              }
+            }
+
+            // Build comment markdown
+            let md = `## 🔍 OpenAPI Design Standard Lint Report\n\n`;
+
+            const isClean = errorCount === 0 && warningCount === 0;
+            const statusEmoji = isClean ? '✅' : '❌';
+            md += `### Summary\n`;
+            md += `* **Status**: ${statusEmoji} ${isClean ? 'Passed' : 'Failed'}\n`;
+            md += `* **Rules Checked**: ${Object.keys(rules).length}\n`;
+            md += `* **Rules Passed**: ${passedRules.length} / ${Object.keys(rules).length}\n`;
+            md += `* **Diagnostics**: ${errorCount} errors, ${warningCount} warnings, ${infoCount} infos, ${hintCount} hints\n\n`;
+
+            if (failedRules.length > 0) {
+              md += `### ⚠️ Failed / Warned Rules\n\n`;
+              for (const rule of failedRules) {
+                md += `<details open>\n<summary><b>${rule.name}</b> - <i>${rule.description}</i></summary>\n\n`;
+                md += `| File | Line | Severity | Message |\n`;
+                md += `| --- | --- | --- | --- |\n`;
+                for (const f of rule.findings) {
+                  const sev = severityMap[f.severity] || { label: 'Unknown', emoji: '❓' };
+                  const line = f.range && f.range.start ? f.range.start.line + 1 : 1;
+                  const fileLink = `[\`${path.basename(f.source)}\`](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/${context.sha}/${f.source}#L${line})`;
+                  md += `| ${fileLink} | ${line} | ${sev.emoji} ${sev.label} | ${f.message} |\n`;
+                }
+                md += `\n</details>\n\n`;
+              }
+            }
+
+            if (passedRules.length > 0) {
+              md += `### ✅ Passed Rules\n\n`;
+              md += `<details>\n<summary>Click to view all ${passedRules.length} passing rules</summary>\n\n`;
+              md += `| Rule | Description |\n`;
+              md += `| --- | --- |\n`;
+              for (const rule of passedRules) {
+                md += `| \`${rule.name}\` | ${rule.description} |\n`;
+              }
+              md += `\n</details>\n\n`;
+            }
+
+            // Post comment to commit
+            const sha = context.sha;
+            try {
+              await github.rest.repos.createCommitComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: sha,
+                body: md
+              });
+            } catch (err) {
+              console.error('Failed to post commit comment:', err);
+            }
+
+            // Post comment to PR if in pull request context
+            if (context.payload.pull_request) {
+              const prNumber = context.payload.pull_request.number;
+              try {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  body: md
+                });
+              } catch (err) {
+                console.error('Failed to post PR comment:', err);
+              }
+            }
+
+            // Fail the workflow step if there are errors or warnings
+            if (errorCount > 0 || warningCount > 0) {
+              core.setFailed(`Lint failed with ${errorCount} errors and ${warningCount} warnings.`);
+            }
