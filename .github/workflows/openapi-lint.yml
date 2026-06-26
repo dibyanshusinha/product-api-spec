@@ -30,4 +30,4 @@ jobs:
         run: npm install --prefix standards/api-design-standard
 
       - name: Lint OpenAPI spec
-        run: node standards/api-design-standard/tools/run-api-design-standard.mjs apispec.yaml
+        run: node standards/api-design-standard/tools/run-api-design-standard.mjs openapi.yaml

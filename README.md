@@ -2,13 +2,12 @@
 
 Independent OpenAPI contract project for the Product API.
 
-This project owns the API shape. Spring Boot services consume this repository as a git submodule and generate server interfaces/models from `apispec.yaml`.
+This project owns the API shape. Spring Boot services consume this repository as a git submodule and generate server interfaces/models from `openapi.yaml`.
 
 ## Layout
 
 ```text
-apispec.yaml
-paths/
+openapi.yaml
 components/
 standards/
   api-design-standard/   -> reusable API design standard rules
@@ -25,7 +24,7 @@ npm install --prefix standards/api-design-standard
 Run the design standard:
 
 ```bash
-node standards/api-design-standard/tools/run-api-design-standard.mjs apispec.yaml
+node standards/api-design-standard/tools/run-api-design-standard.mjs openapi.yaml
 ```
 
 The lint command uses:
