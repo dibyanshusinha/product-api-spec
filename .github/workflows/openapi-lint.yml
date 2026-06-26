@@ -92,13 +92,17 @@ jobs:
             const passedRules = [];
             const failedRules = [];
 
+            // Add all rules with findings to failedRules (both custom and inherited)
+            for (const [ruleName, findings] of Object.entries(findingsMap)) {
+              const ruleDef = rules[ruleName];
+              const description = ruleDef ? (ruleDef.description || 'No description provided') : 'Standard OpenAPI rule';
+              failedRules.push({ name: ruleName, description, findings });
+            }
+
+            // Add custom rules without findings to passedRules
             for (const [ruleName, ruleDef] of Object.entries(rules)) {
-              const description = ruleDef.description || 'No description provided';
-              const findings = findingsMap[ruleName];
-              if (findings && findings.length > 0) {
-                failedRules.push({ name: ruleName, description, findings });
-              } else {
-                passedRules.push({ name: ruleName, description });
+              if (!findingsMap[ruleName]) {
+                passedRules.push({ name: ruleName, description: ruleDef.description || 'No description provided' });
               }
             }
 
