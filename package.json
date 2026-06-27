@@ -1,0 +1,14 @@
+{
+  "name": "product-service-openapi",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:docs": "node tools/build-swagger-ui.mjs",
+    "docs": "node tools/serve-swagger-ui.mjs",
+    "lint:api": "node standards/api-design-standard/tools/run-api-design-standard.mjs openapi.yaml"
+  },
+  "devDependencies": {
+    "swagger-ui-dist": "^5.32.8"
+  }
+}

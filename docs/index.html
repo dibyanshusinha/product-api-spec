@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Product API Docs</title>
+    <link rel="stylesheet" href="./swagger-ui/swagger-ui.css" />
+    <style>
+      body {
+        margin: 0;
+        background: #f7f7f7;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+    <script src="./swagger-ui/swagger-ui-bundle.js"></script>
+    <script src="./swagger-ui/swagger-ui-standalone-preset.js"></script>
+    <script>
+      const config = new URLSearchParams(window.location.search);
+      const specUrl = config.get("url") || "../openapi.yaml";
+
+      window.ui = SwaggerUIBundle({
+        url: specUrl,
+        dom_id: "#swagger-ui",
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        layout: "BaseLayout"
+      });
+    </script>
+  </body>
+</html>

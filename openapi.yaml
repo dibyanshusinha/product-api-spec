@@ -7,7 +7,20 @@ info:
     name: Product API Team
     email: api-support@example.com
 servers:
-  - url: /
+  - url: "{scheme}://{host}:{port}{basePath}"
+    description: Target API server for Swagger UI try-it-out.
+    variables:
+      scheme:
+        default: http
+        enum:
+          - http
+          - https
+      host:
+        default: localhost
+      port:
+        default: "8080"
+      basePath:
+        default: /
 security:
   - bearerAuth: []
 tags:
