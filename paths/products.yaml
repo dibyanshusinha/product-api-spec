@@ -1,0 +1,150 @@
+ProductsCollection:
+  get:
+    tags:
+      - Products
+    operationId: listProducts
+    summary: List products
+    description: Retrieve a paginated list of products, optionally sorted by specified fields.
+    parameters:
+      - $ref: '../components/common/parameters.yaml#/CorrelationId'
+      - $ref: '../components/common/parameters.yaml#/PageSize'
+      - $ref: '../components/common/parameters.yaml#/PageToken'
+      - name: sortBy
+        in: query
+        description: Field used for sorting products.
+        required: false
+        schema:
+          type: string
+          default: createdAt
+          enum:
+            - id
+            - name
+            - sku
+            - price
+            - active
+            - createdAt
+            - updatedAt
+      - $ref: '../components/common/parameters.yaml#/Direction'
+    responses:
+      '200':
+        description: Paged products returned
+        headers:
+          X-Correlation-Id:
+            $ref: '../components/common/headers.yaml#/CorrelationId'
+        content:
+          application/json:
+            schema:
+              $ref: '../components/products/schemas.yaml#/ProductPage'
+      '400':
+        $ref: '../components/common/responses/BadRequest.yaml'
+  post:
+    tags:
+      - Products
+    operationId: createProduct
+    summary: Create product
+    description: Create a new product with the provided details.
+    parameters:
+      - $ref: '../components/common/parameters.yaml#/CorrelationId'
+      - $ref: '../components/common/parameters.yaml#/IdempotencyKey'
+    requestBody:
+      description: Product payload for creation.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/products/schemas.yaml#/ProductCreateRequest'
+    responses:
+      '201':
+        description: Product created
+        headers:
+          X-Correlation-Id:
+            $ref: '../components/common/headers.yaml#/CorrelationId'
+          Location:
+            description: Created product resource location.
+            schema:
+              type: string
+              format: uri-reference
+              example: /v1/products/42
+        content:
+          application/json:
+            schema:
+              $ref: '../components/products/schemas.yaml#/ProductResponse'
+      '400':
+        $ref: '../components/common/responses/BadRequest.yaml'
+      '409':
+        $ref: '../components/common/responses/Conflict.yaml'
+
+ProductResource:
+  get:
+    tags:
+      - Products
+    operationId: getProduct
+    summary: Get product
+    description: Retrieve a specific product by its unique identifier.
+    parameters:
+      - $ref: '../components/common/parameters.yaml#/CorrelationId'
+      - $ref: '../components/common/parameters.yaml#/ProductId'
+    responses:
+      '200':
+        description: Product returned
+        headers:
+          X-Correlation-Id:
+            $ref: '../components/common/headers.yaml#/CorrelationId'
+        content:
+          application/json:
+            schema:
+              $ref: '../components/products/schemas.yaml#/ProductResponse'
+      '404':
+        $ref: '../components/common/responses/NotFound.yaml'
+  patch:
+    tags:
+      - Products
+    operationId: updateProduct
+    summary: Update product
+    description: Perform a partial or full update of an existing product.
+    parameters:
+      - $ref: '../components/common/parameters.yaml#/CorrelationId'
+      - $ref: '../components/common/parameters.yaml#/ProductId'
+      - $ref: '../components/common/parameters.yaml#/UpdateMask'
+      - $ref: '../components/common/parameters.yaml#/IfMatch'
+    requestBody:
+      description: Product payload for update.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/products/schemas.yaml#/ProductUpdateRequest'
+    responses:
+      '200':
+        description: Product returned
+        headers:
+          X-Correlation-Id:
+            $ref: '../components/common/headers.yaml#/CorrelationId'
+        content:
+          application/json:
+            schema:
+              $ref: '../components/products/schemas.yaml#/ProductResponse'
+      '400':
+        $ref: '../components/common/responses/BadRequest.yaml'
+      '404':
+        $ref: '../components/common/responses/NotFound.yaml'
+      '409':
+        $ref: '../components/common/responses/Conflict.yaml'
+  delete:
+    tags:
+      - Products
+    operationId: deleteProduct
+    summary: Delete product
+    description: Delete a product by its unique identifier.
+    parameters:
+      - $ref: '../components/common/parameters.yaml#/CorrelationId'
+      - $ref: '../components/common/parameters.yaml#/ProductId'
+      - $ref: '../components/common/parameters.yaml#/IfMatch'
+    responses:
+      '204':
+        description: Product deleted
+        headers:
+          X-Correlation-Id:
+            $ref: '../components/common/headers.yaml#/CorrelationId'
+      '404':
+        $ref: '../components/common/responses/NotFound.yaml'

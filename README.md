@@ -9,6 +9,8 @@ This project owns the API shape. Backend services consume this repository as a g
 ```text
 openapi.yaml
 components/
+paths/
+  products.yaml           -> product route operations
 standards/
   api-design-standard/   -> reusable API design standard rules
 ```
@@ -62,7 +64,7 @@ Then open:
 http://localhost:8081/docs/
 ```
 
-The preview serves `openapi.yaml` and the `components/` files from this directory so relative `$ref` links resolve the same way they do during backend code generation. `npm run docs` first generates local Swagger UI assets under `docs/swagger-ui/`, so the browser does not load Swagger UI from a CDN. Set a different port if needed:
+The preview serves `openapi.yaml`, `paths/`, and `components/` from this directory so relative `$ref` links resolve the same way they do during backend code generation. `npm run docs` first generates local Swagger UI assets under `docs/swagger-ui/`, so the browser does not load Swagger UI from a CDN. Set a different port if needed:
 
 ```bash
 PORT=9091 npm run docs
