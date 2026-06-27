@@ -19,16 +19,58 @@
     <script>
       const config = new URLSearchParams(window.location.search);
       const specUrl = config.get("url") || "../openapi.yaml";
+      const useRuntimeServer = config.get("runtimeServer") === "true";
 
-      window.ui = SwaggerUIBundle({
-        url: specUrl,
-        dom_id: "#swagger-ui",
-        deepLinking: true,
-        presets: [
-          SwaggerUIBundle.presets.apis,
-          SwaggerUIStandalonePreset
-        ],
-        layout: "BaseLayout"
+      const designTimeServers = `servers:
+  - url: "{scheme}://{host}:{port}{basePath}"
+    description: Target API server for Swagger UI try-it-out.
+    variables:
+      scheme:
+        default: http
+        enum:
+          - http
+          - https
+      host:
+        default: localhost
+      port:
+        default: "8080"
+      basePath:
+        default: /
+`;
+
+      function runtimeBaseUrl() {
+        const apiDocsPath = "/api_docs";
+        const apiDocsIndex = window.location.pathname.indexOf(apiDocsPath);
+        const contextPath = apiDocsIndex > 0 ? window.location.pathname.slice(0, apiDocsIndex) : "";
+        return `${window.location.origin}${contextPath}`;
+      }
+
+      async function resolveSpecUrl() {
+        if (!useRuntimeServer) {
+          return specUrl;
+        }
+
+        const response = await fetch(specUrl);
+        const contract = await response.text();
+        const runtimeServers = `servers:
+  - url: "${runtimeBaseUrl()}"
+    description: Running API server.
+`;
+        const runtimeContract = contract.replace(designTimeServers, runtimeServers);
+        return URL.createObjectURL(new Blob([runtimeContract], { type: "application/yaml" }));
+      }
+
+      resolveSpecUrl().then((resolvedSpecUrl) => {
+        window.ui = SwaggerUIBundle({
+          url: resolvedSpecUrl,
+          dom_id: "#swagger-ui",
+          deepLinking: true,
+          presets: [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIStandalonePreset
+          ],
+          layout: "BaseLayout"
+        });
       });
     </script>
   </body>
