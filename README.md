@@ -44,8 +44,10 @@ git submodule update --remote standards/api-design-standard
 The latest `main` branch Swagger UI preview can be served by GitHub Pages from this repository's static files:
 
 ```text
-https://dibyanshusinha.github.io/product-api-spec/docs/
+https://<owner>.github.io/<repo>/docs/
 ```
+
+GitHub also shows the exact deployed URL in the `Deploy static content to Pages` workflow summary.
 
 Swagger UI can be served directly from this OpenAPI project without starting the Spring Boot application:
 
