@@ -50,21 +50,6 @@
         return `${window.location.origin}${contextPath}`;
       }
 
-      async function resolveSpecUrl() {
-        if (!useRuntimeServer) {
-          return specUrl;
-        }
-
-        const response = await fetch(specUrl);
-        const contract = await response.text();
-        const runtimeServers = `servers:
-  - url: "${runtimeBaseUrl()}"
-    description: Running API server.`;
-
-        const runtimeContract = contract.replace(designTimeServers, runtimeServers);
-        return URL.createObjectURL(new Blob([runtimeContract], { type: "application/yaml" }));
-      }
-
       /**
        * Swagger UI re-renders the servers block (React) on every variable change,
        * reverting option text back to the raw URL template.
@@ -107,30 +92,41 @@
 
         // Strategy 1: event delegation — catches variable edits immediately.
         const root = document.getElementById('swagger-ui');
-        root.addEventListener('input',  refresh);
-        root.addEventListener('change', refresh);
+        if (root) {
+          root.addEventListener('input',  refresh);
+          root.addEventListener('change', refresh);
 
-        // Strategy 2: MutationObserver — catches structural re-renders.
-        let pending = false;
-        new MutationObserver(() => {
-          if (pending) return;
-          pending = true;
-          requestAnimationFrame(() => { pending = false; refresh(); });
-        }).observe(root, { childList: true, subtree: true });
+          // Strategy 2: MutationObserver — catches structural re-renders.
+          let pending = false;
+          new MutationObserver(() => {
+            if (pending) return;
+            pending = true;
+            requestAnimationFrame(() => { pending = false; refresh(); });
+          }).observe(root, { childList: true, subtree: true });
+        }
       }
 
-      resolveSpecUrl().then((resolvedSpecUrl) => {
-        window.ui = SwaggerUIBundle({
-          url: resolvedSpecUrl,
-          dom_id: "#swagger-ui",
-          deepLinking: true,
-          presets: [
-            SwaggerUIBundle.presets.apis,
-            SwaggerUIStandalonePreset
-          ],
-          layout: "BaseLayout",
-          onComplete: patchServerDropdown
-        });
+      window.ui = SwaggerUIBundle({
+        url: specUrl,
+        dom_id: "#swagger-ui",
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        layout: "BaseLayout",
+        onComplete: patchServerDropdown,
+        responseInterceptor: (response) => {
+          // If runtimeServer=true is active, dynamically swap the servers block
+          // in the fetched openapi.yaml to point directly to the running server.
+          if (useRuntimeServer && response.url.includes("openapi.yaml")) {
+            const runtimeServers = `servers:
+  - url: "${runtimeBaseUrl()}"
+    description: Running API server.`;
+            response.text = response.text.replace(designTimeServers, runtimeServers);
+          }
+          return response;
+        }
       });
     </script>
   </body>
