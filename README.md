@@ -41,7 +41,7 @@ git submodule update --remote standards/api-design-standard
 
 ## Build And Preview Swagger UI
 
-The latest `main` branch Swagger UI preview is published to GitHub Pages:
+The latest `main` branch Swagger UI preview can be served by GitHub Pages from this repository's static files:
 
 ```text
 https://dibyanshusinha.github.io/product-api-spec/docs/
