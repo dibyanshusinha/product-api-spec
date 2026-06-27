@@ -10,6 +10,12 @@
         margin: 0;
         background: #f7f7f7;
       }
+
+      /* The dropdown already shows the computed URL via patchServerDropdown(),
+         so the separate "Computed URL: …" row is redundant. */
+      .swagger-ui .servers .computed-url {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -23,7 +29,6 @@
 
       const designTimeServers = `servers:
   - url: "{scheme}://{host}:{port}{basePath}"
-    description: Target API server for Swagger UI try-it-out.
     variables:
       scheme:
         default: http
@@ -35,8 +40,8 @@
       port:
         default: "8080"
       basePath:
-        default: /
-`;
+        default: /`;
+
 
       function runtimeBaseUrl() {
         const apiDocsPath = "/api_docs";
@@ -54,10 +59,64 @@
         const contract = await response.text();
         const runtimeServers = `servers:
   - url: "${runtimeBaseUrl()}"
-    description: Running API server.
-`;
+    description: Running API server.`;
+
         const runtimeContract = contract.replace(designTimeServers, runtimeServers);
         return URL.createObjectURL(new Blob([runtimeContract], { type: "application/yaml" }));
+      }
+
+      /**
+       * Swagger UI re-renders the servers block (React) on every variable change,
+       * reverting option text back to the raw URL template.
+       *
+       * Two complementary strategies keep the dropdown in sync:
+       *
+       *  1. Event delegation on the stable #swagger-ui root catches `input` /
+       *     `change` events from every variable field immediately — before React
+       *     even re-renders (React controlled inputs update .value in-place, which
+       *     does NOT trigger a MutationObserver childList event).
+       *
+       *  2. MutationObserver handles structural replacements: initial spec load,
+       *     server switch, or any full subtree replacement by React.
+       *
+       * Template source: opt.value on each <option> is always the raw URL template
+       * (React sets it as an HTML attribute and never changes it), so no caching needed.
+       * Variable values: [data-variable] is the attribute Swagger UI puts on every
+       * variable input/select (confirmed from source).
+       */
+      function patchServerDropdown() {
+        function readVars() {
+          const vars = {};
+          document.querySelectorAll('.swagger-ui .servers [data-variable]').forEach(el => {
+            vars[el.getAttribute('data-variable')] = el.value;
+          });
+          return vars;
+        }
+
+        function refresh() {
+          const select = document.querySelector('.swagger-ui .servers select:not([data-variable])');
+          if (!select || !select.options.length) return;
+          const vars = readVars();
+          Array.from(select.options).forEach(opt => {
+            const computed = opt.value.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? `{${k}}`);
+            if (opt.text !== computed) opt.text = computed;
+          });
+        }
+
+        refresh();
+
+        // Strategy 1: event delegation — catches variable edits immediately.
+        const root = document.getElementById('swagger-ui');
+        root.addEventListener('input',  refresh);
+        root.addEventListener('change', refresh);
+
+        // Strategy 2: MutationObserver — catches structural re-renders.
+        let pending = false;
+        new MutationObserver(() => {
+          if (pending) return;
+          pending = true;
+          requestAnimationFrame(() => { pending = false; refresh(); });
+        }).observe(root, { childList: true, subtree: true });
       }
 
       resolveSpecUrl().then((resolvedSpecUrl) => {
@@ -69,7 +128,8 @@
             SwaggerUIBundle.presets.apis,
             SwaggerUIStandalonePreset
           ],
-          layout: "BaseLayout"
+          layout: "BaseLayout",
+          onComplete: patchServerDropdown
         });
       });
     </script>

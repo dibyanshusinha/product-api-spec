@@ -8,7 +8,6 @@ info:
     email: api-support@example.com
 servers:
   - url: "{scheme}://{host}:{port}{basePath}"
-    description: Target API server for Swagger UI try-it-out.
     variables:
       scheme:
         default: http
