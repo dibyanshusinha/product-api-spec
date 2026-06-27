@@ -4,7 +4,10 @@ CorrelationId:
   description: Optional request correlation identifier.
   required: false
   schema:
-    $ref: 'schemas/CorrelationId.yaml#/CorrelationId'
+    type: string
+    description: Request correlation identifier.
+    maxLength: 128
+    pattern: '^[A-Za-z0-9._:-]+$'
 ProductId:
   name: productId
   in: path

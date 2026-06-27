@@ -1,4 +1,7 @@
 CorrelationId:
   description: Request correlation identifier.
   schema:
-    $ref: 'schemas/CorrelationId.yaml#/CorrelationId'
+    type: string
+    description: Request correlation identifier.
+    maxLength: 128
+    pattern: '^[A-Za-z0-9._:-]+$'
